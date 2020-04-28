@@ -97,7 +97,15 @@ function wpf_user_roles_render_admin_menu() {
 			<?php $all_roles      = $wp_roles->roles; ?>
 			<?php $editable_roles = apply_filters( 'editable_roles', $all_roles ); ?>
 
-			<?php $settings       = get_option( 'wpf_roles_settings', array() ); ?>
+			<?php
+
+			$settings = get_option( 'wpf_roles_settings', array() );
+
+			if ( empty( $settings ) ) {
+				$settings = array();
+			}
+
+			?>
 
 			<table class="table table-hover" id="wpf-mm-products-table">
 				<thead>
