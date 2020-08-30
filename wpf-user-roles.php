@@ -2,12 +2,19 @@
 
 /*
 Plugin Name: WP Fusion - User Roles
-Description: Allows linking a tag with a WordPress user role to automatically set roles when tags are modified.
+Description: Allows linking a tag with a WordPress user role to automatically set roles when tags are modified, as well as applying tags based on user role changes
 Plugin URI: https://verygoodplugins.com/
-Version: 1.0
+Version: 1.1
 Author: Very Good Plugins
 Author URI: https://verygoodplugins.com/
 */
+
+
+/**
+ * Triggered when tags are modified, updates user roles
+ *
+ * @return void
+ */
 
 function wpf_user_roles_tags_modified( $user_id, $user_tags ) {
 
@@ -17,6 +24,10 @@ function wpf_user_roles_tags_modified( $user_id, $user_tags ) {
 	}
 
 	$settings = get_option( 'wpf_roles_settings', array() );
+
+	if ( empty( $settings ) ) {
+		return;
+	}
 
 	$user = get_user_by( 'id', $user_id );
 
@@ -48,6 +59,106 @@ function wpf_user_roles_tags_modified( $user_id, $user_tags ) {
 }
 
 add_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
+
+/**
+ * Apply tags when role added
+ *
+ * @return void
+ */
+
+function wpf_user_roles_added_role( $user_id, $role ) {
+
+	error_log('added ' . $role);
+
+	// Don't run for admins
+
+	if ( user_can( $user_id, 'manage_options' ) ) {
+		return;
+	}
+
+	$settings = get_option( 'wpf_roles_settings', array() );
+
+	if ( empty( $settings ) ) {
+		return;
+	}
+
+	remove_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
+
+	foreach ( $settings as $role_slug => $setting ) {
+
+		if ( $role == $role_slug ) {
+
+			if ( ! empty( $setting['tag_link'] ) ) {
+				wp_fusion()->user->apply_tags( $setting['tag_link'], $user_id );
+			}
+
+			if ( ! empty( $setting['apply_tags'] ) ) {
+				wp_fusion()->user->apply_tags( $setting['apply_tags'], $user_id );
+			}
+
+			break;
+
+		}
+
+	}
+
+	add_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
+
+}
+
+add_action( 'add_user_role', 'wpf_user_roles_added_role', 10, 2 );
+
+
+/**
+ * Remove linked tag when role removed
+ *
+ * @return void
+ */
+
+function wpf_user_roles_removed_role( $user_id, $role ) {
+
+	error_log('removed ' . $role);
+
+	// Don't run for admins
+
+	if ( user_can( $user_id, 'manage_options' ) ) {
+		return;
+	}
+
+	$settings = get_option( 'wpf_roles_settings', array() );
+
+	if ( empty( $settings ) ) {
+		return;
+	}
+
+	remove_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
+
+	foreach ( $settings as $role_slug => $setting ) {
+
+		if ( $role == $role_slug ) {
+
+			if ( ! empty( $setting['tag_link'] ) ) {
+				wp_fusion()->user->remove_tags( $setting['tag_link'], $user_id );
+			}
+
+			break;
+
+		}
+
+	}
+
+	add_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
+
+}
+
+add_action( 'remove_user_role', 'wpf_user_roles_removed_role', 10, 2 );
+
+
+/**
+ * Register admin menu
+ *
+ * @return void
+ */
 
 function wpf_user_roles_admin_menu() {
 
@@ -107,11 +218,12 @@ function wpf_user_roles_render_admin_menu() {
 
 			?>
 
-			<table class="table table-hover" id="wpf-mm-products-table">
+			<table class="table table-hover wpf-settings-table">
 				<thead>
 				<tr>
 					<th>Role</th>
-					<th>Link With Tag</th>
+					<th>Apply tags when role is granted</th>
+					<th>Link with tag</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -126,6 +238,22 @@ function wpf_user_roles_render_admin_menu() {
 
 					<tr>
 						<td><?php echo $role['name']; ?></td>
+
+						<td>
+							<?php
+
+							$args = array(
+								'setting'      => $settings[ $slug ],
+								'meta_name'    => 'wpf-settings',
+								'field_id'     => $slug,
+								'field_sub_id' => 'apply_tags',
+							);
+
+							wpf_render_tag_multiselect( $args );
+
+							?>
+							
+						</td>
 						<td id="wpf-tags-td">
 							<?php
 
