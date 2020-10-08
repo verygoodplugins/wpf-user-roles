@@ -231,6 +231,11 @@ function wpf_user_roles_render_admin_menu() {
 				<?php foreach ( $editable_roles as $slug => $role ) : ?>
 
 					<?php
+
+					if ( ! isset( $settings[ $slug ]['apply_tags'] ) ) {
+						$settings[ $slug ]['apply_tags'] = array();
+					}
+
 					if ( ! isset( $settings[ $slug ]['tag_link'] ) ) {
 						$settings[ $slug ]['tag_link'] = array();
 					}
