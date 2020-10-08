@@ -4,7 +4,7 @@
 Plugin Name: WP Fusion - User Roles
 Description: Allows linking a tag with a WordPress user role to automatically set roles when tags are modified, as well as applying tags based on user role changes
 Plugin URI: https://verygoodplugins.com/
-Version: 1.1
+Version: 1.2
 Author: Very Good Plugins
 Author URI: https://verygoodplugins.com/
 */
@@ -243,10 +243,8 @@ function wpf_user_roles_render_admin_menu() {
 							<?php
 
 							$args = array(
-								'setting'      => $settings[ $slug ],
-								'meta_name'    => 'wpf-settings',
-								'field_id'     => $slug,
-								'field_sub_id' => 'apply_tags',
+								'setting'   => $settings[ $slug ]['apply_tags'],
+								'meta_name' => "wpf-settings[{$slug}][apply_tags]",
 							);
 
 							wpf_render_tag_multiselect( $args );
@@ -258,12 +256,9 @@ function wpf_user_roles_render_admin_menu() {
 							<?php
 
 							$args = array(
-								'setting'      => $settings[ $slug ],
-								'meta_name'    => 'wpf-settings',
-								'field_id'     => $slug,
-								'field_sub_id' => 'tag_link',
-								'placeholder'  => 'Select a tag',
-								'limit'        => 1,
+								'setting'   => $settings[ $slug ]['tag_link'],
+								'meta_name' => "wpf-settings[{$slug}][tag_link]",
+								'limit'     => 1,
 							);
 
 							wpf_render_tag_multiselect( $args );
