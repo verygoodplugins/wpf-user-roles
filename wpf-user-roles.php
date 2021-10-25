@@ -66,11 +66,9 @@ add_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
  * @return void
  */
 
-function wpf_user_roles_added_role( $user_id, $role ) {
+function wpf_user_roles_added_role( $user_id ) {
 
-	error_log('added ' . $role);
-
-	// Don't run for admins
+	// Don't run for admins.
 
 	if ( user_can( $user_id, 'manage_options' ) ) {
 		return;
@@ -84,29 +82,36 @@ function wpf_user_roles_added_role( $user_id, $role ) {
 
 	remove_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
 
-	foreach ( $settings as $role_slug => $setting ) {
+	$user = get_userdata( $user_id );
 
-		if ( $role == $role_slug ) {
+	if ( ! empty( $user->caps ) && is_array( $user->caps ) ) {
 
-			if ( ! empty( $setting['tag_link'] ) ) {
-				wp_fusion()->user->apply_tags( $setting['tag_link'], $user_id );
+		$roles = array_keys( $user->caps );
+
+		foreach ( $settings as $role_slug => $setting ) {
+
+			if ( in_array( $role_slug, $roles ) ) {
+
+				if ( ! empty( $setting['tag_link'] ) ) {
+					wp_fusion()->user->apply_tags( $setting['tag_link'], $user_id );
+				}
+
+				if ( ! empty( $setting['apply_tags'] ) ) {
+					wp_fusion()->user->apply_tags( $setting['apply_tags'], $user_id );
+				}
+
 			}
-
-			if ( ! empty( $setting['apply_tags'] ) ) {
-				wp_fusion()->user->apply_tags( $setting['apply_tags'], $user_id );
-			}
-
-			break;
 
 		}
-
 	}
 
 	add_action( 'wpf_tags_modified', 'wpf_user_roles_tags_modified', 10, 2 );
 
 }
 
-add_action( 'add_user_role', 'wpf_user_roles_added_role', 10, 2 );
+add_action( 'add_user_role', 'wpf_user_roles_added_role' );
+add_action( 'set_user_role', 'wpf_user_roles_added_role' );
+add_action( 'user_register', 'wpf_user_roles_added_role' );
 
 
 /**
