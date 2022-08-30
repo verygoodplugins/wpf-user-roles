@@ -21,3 +21,5 @@ node_modules/
 *.log
 *.sql
 *.sqlite
+wp-fusion-user-roles.code-workspace
+.DS_Store
