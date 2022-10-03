@@ -25,7 +25,7 @@ class WP_Fusion_User_Roles_Public {
 
 		add_action( 'add_user_role', array( $this, 'added_role' ) );
 		add_action( 'set_user_role', array( $this, 'added_role' ) );
-		add_action( 'user_register', array( $this, 'added_role' ) );
+		add_action( 'wpf_user_created', array( $this, 'added_role' ) );
 
 		add_action( 'remove_user_role', array( $this, 'removed_role' ), 10, 2 );
 
@@ -101,6 +101,11 @@ class WP_Fusion_User_Roles_Public {
 
 		if ( user_can( $user_id, 'manage_options' ) ) {
 			return; // Don't run for admins.
+		}
+
+		if ( ! wpf_get_contact_id( $user_id ) ) {
+			// Don't apply the tags if WPF hasn't synced the new user to the CRM yet.
+			return;
 		}
 
 		$settings = get_option( 'wpf_roles_settings', array() );

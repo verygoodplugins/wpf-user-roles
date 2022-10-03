@@ -2,7 +2,7 @@
 Contributors: verygoodplugins
 Tags: wp fusion, roles
 Requires at least: 4.0
-Tested up to: 6.0.1
+Tested up to: 6.0.2
 Stable tag: 1.2.0
 
 Allows linking a CRM tag with a WordPress user role to automatically set roles when tags are modified, as well as applying tags based on user role changes.
@@ -12,6 +12,9 @@ Allows linking a CRM tag with a WordPress user role to automatically set roles w
 Allows linking a CRM tag with a WordPress user role to automatically set roles when tags are modified, as well as applying tags based on user role changes.
 
 == Changelog ==
+
+= 1.2.1 - 10/3/2022 =
+* Fixed tags not being applied to new users when the role was set before WP Fusion had synced the contact to the CRM
 
 = 1.2.0 - 8/30/2022 =
 * Refactored and released as an official WP Fusion addon
