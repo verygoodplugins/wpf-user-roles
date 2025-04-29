@@ -54,10 +54,10 @@ class WP_Fusion_User_Roles_Public {
 		$user = get_user_by( 'id', $user_id );
 
 		// Prevent looping.
-		remove_action( 'profile_update', array( wp_fusion()->user, 'profile_update' ), 10, 2 );
+		remove_action( 'profile_update', array( wp_fusion()->user, 'profile_update' ) );
 		remove_action( 'add_user_role', array( $this, 'added_role' ) );
 		remove_action( 'set_user_role', array( $this, 'added_role' ) );
-		remove_action( 'remove_user_role', array( $this, 'removed_role' ), 10, 2 );
+		remove_action( 'remove_user_role', array( $this, 'removed_role' ) );
 
 		foreach ( $settings as $role_slug => $setting ) {
 
@@ -69,10 +69,10 @@ class WP_Fusion_User_Roles_Public {
 
 			if ( ! empty( $result ) && ! in_array( $role_slug, (array) $user->roles ) ) {
 
-				wp_fusion()->logger->handle( 'info', $user_id, 'Adding user role <strong>' . $role_slug . '</strong>, triggered by linked tag <strong>' . $setting['tag_link'][0] . '</strong>' );
+				wp_fusion()->logger->handle( 'info', $user_id, 'Adding user role <strong>' . $role_slug . '</strong>, triggered by linked tag <strong>' . wpf_get_tag_label( $setting['tag_link'][0] ) . '</strong>.' );
 
-				if ( function_exists( 'hmmr_fs' ) || class_exists( 'Members_Plugin' ) ) {
-					// "HM Multiple Roles" and "Members" allow for visually managing multiple roles.
+				if ( function_exists( 'hmmr_fs' ) || class_exists( 'Members_Plugin' ) || defined( 'URE_VERSION' ) ) {
+					// "HM Multiple Roles", "Members", and User Role Editor allow for visually managing multiple roles.
 					$user->add_role( $role_slug );
 				} else {
 					$user->set_role( $role_slug );
@@ -80,12 +80,16 @@ class WP_Fusion_User_Roles_Public {
 
 			} elseif ( empty( $result ) && in_array( $role_slug, (array) $user->roles ) ) {
 
-				wp_fusion()->logger->handle( 'info', $user_id, 'Removing user role <strong>' . $role_slug . '</strong>, triggered by linked tag <strong>' . $setting['tag_link'][0] . '</strong>' );
+				wp_fusion()->logger->handle( 'info', $user_id, 'Removing user role <strong>' . $role_slug . '</strong>, triggered by linked tag <strong>' . wpf_get_tag_label( $setting['tag_link'][0] ) . '</strong>.' );
 
 				$user->remove_role( $role_slug );
 
 			}
 		}
+
+		add_action( 'add_user_role', array( $this, 'added_role' ) );
+		add_action( 'set_user_role', array( $this, 'added_role' ) );
+		add_action( 'remove_user_role', array( $this, 'removed_role' ), 10, 2 );
 
 	}
 
@@ -98,6 +102,8 @@ class WP_Fusion_User_Roles_Public {
 	 * @param int $user_id The user ID.
 	 */
 	public function added_role( $user_id ) {
+
+		error_log( print_r( 'logins plugin added role: ' . current_action(), true ) );
 
 		if ( user_can( $user_id, 'manage_options' ) ) {
 			return; // Don't run for admins.
@@ -114,9 +120,12 @@ class WP_Fusion_User_Roles_Public {
 			return;
 		}
 
-		remove_action( 'wpf_tags_modified', array( $this, 'tags_modified' ), 10, 2 );
+		remove_action( 'wpf_tags_modified', array( $this, 'tags_modified' ) );
 
 		$user = get_userdata( $user_id );
+
+		error_log( print_r( 'added role!', true ) );
+		error_log( print_r( $user->caps, true ) );
 
 		if ( ! empty( $user->caps ) && is_array( $user->caps ) ) {
 

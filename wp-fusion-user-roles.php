@@ -4,7 +4,7 @@
  * Plugin Name: WP Fusion - User Roles Addon
  * Description: Allows linking a CRM tag with a WordPress user role to automatically set roles when tags are modified, as well as applying tags based on user role changes.
  * Plugin URI: https://wpfusion.com/
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: Very Good Plugins
  * Author URI: https://verygoodplugins.com/
  * Text Domain: wp-fusion-user-roles
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WPF_USER_ROLES_VERSION', '1.2.1' );
+define( 'WPF_USER_ROLES_VERSION', '1.2.2' );
 
 /**
  * Class WP_Fusion_User_Roles
