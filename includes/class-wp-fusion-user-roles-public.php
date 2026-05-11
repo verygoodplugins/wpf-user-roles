@@ -68,7 +68,7 @@ class WP_Fusion_User_Roles_Public {
 			$tag_link = $setting['tag_link'];
 
 			// Translate legacy tag IDs (e.g. HubSpot v1→v3 list migration).
-			if ( isset( wp_fusion()->tag_migration ) && method_exists( wp_fusion()->tag_migration, 'translate_tags' ) ) {
+			if ( isset( wp_fusion()->tag_migration ) && is_object( wp_fusion()->tag_migration ) && method_exists( wp_fusion()->tag_migration, 'translate_tags' ) ) {
 				$tag_link = wp_fusion()->tag_migration->translate_tags( $tag_link );
 			}
 
