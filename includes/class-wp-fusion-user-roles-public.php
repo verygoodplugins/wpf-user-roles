@@ -85,11 +85,15 @@ class WP_Fusion_User_Roles_Public {
 					$user->set_role( $role_slug );
 				}
 
+				$this->prevent_profile_role_overwrite();
+
 			} elseif ( empty( $result ) && in_array( $role_slug, (array) $user->roles ) ) {
 
 				wp_fusion()->logger->handle( 'info', $user_id, 'Removing user role <strong>' . $role_slug . '</strong>, triggered by linked tag <strong>' . wpf_get_tag_label( $tag_link[0] ) . '</strong>.' );
 
 				$user->remove_role( $role_slug );
+
+				$this->prevent_profile_role_overwrite();
 
 			}
 		}
@@ -194,5 +198,22 @@ class WP_Fusion_User_Roles_Public {
 
 		add_action( 'wpf_tags_modified', array( $this, 'tags_modified' ), 10, 2 );
 
+	}
+
+	/**
+	 * Prevent WordPress from saving a stale posted role after linked tags update it.
+	 *
+	 * @since x.x
+	 *
+	 * @return void
+	 */
+	private function prevent_profile_role_overwrite() {
+
+		if (
+			doing_action( 'edit_user_profile_update' ) ||
+			doing_action( 'personal_options_update' )
+		) {
+			unset( $_POST['role'] );
+		}
 	}
 }
